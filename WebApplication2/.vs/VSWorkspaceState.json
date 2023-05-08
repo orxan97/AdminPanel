@@ -3,8 +3,12 @@
     "",
     "\\Areas",
     "\\Areas\\Admin",
-    "\\Areas\\Admin\\Controllers"
+    "\\Areas\\Admin\\Controllers",
+    "\\Controllers",
+    "\\Migrations",
+    "\\Models",
+    "\\wwwroot"
   ],
-  "SelectedNode": "\\Areas\\Admin\\Controllers\\DashboardController.cs",
+  "SelectedNode": "\\Migrations\\AppDbContextModelSnapshot.cs",
   "PreviewInSolutionExplorer": false
 }

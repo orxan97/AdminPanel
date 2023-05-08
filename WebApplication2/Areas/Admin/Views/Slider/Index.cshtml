@@ -11,6 +11,7 @@
 				<h4 class="card-title">Sliders </h4>
 				
 				<div class="table-responsive">
+					<a class="btn btn-primary" asp-action="Create">Create</a>
 					<table class="table">
 						<thead>
 							<tr>
@@ -18,6 +19,8 @@
 								<th>Image</th>
 								<th>Title</th>
 								<th>Offer</th>
+								<th>Actions</th>
+
 							</tr>
 						</thead>
 						<tbody>
@@ -30,6 +33,21 @@
 									</td>
 									<td>@sliderItem.Title</td>
 									<td>@sliderItem.Offer</td>
+									<td>
+										<a class="btn btn-success" asp-action="Detail" asp-route-id="@sliderItem.Id">Detail</a>
+										<a class="btn btn-warning" asp-action="Update" asp-route-id=@sliderItem.Id>Update</a>
+										@if (ViewBag.Count == 1)
+										{
+											
+											<a class="btn btn-danger disabled" asp-action="Delete" asp-route-id=@sliderItem.Id>Delete</a>
+										}
+										else
+										{
+											<a class="btn btn-danger " asp-action="Delete" asp-route-id=@sliderItem.Id>Delete</a>
+
+										}
+
+									</td>
 
 								</tr>
 							}
