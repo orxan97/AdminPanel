@@ -953,10 +953,6 @@
       "PackagePath": "staticwebassets\\Assets\\images\\website-images\\1-9-270x300.jpg"
     },
     {
-      "Id": "C:\\Users\\oasla\\Desktop\\AspNetCore\\WebApplication2\\WebApplication2\\wwwroot\\Assets\\images\\website-images\\1.png",
-      "PackagePath": "staticwebassets\\Assets\\images\\website-images\\1.png"
-    },
-    {
       "Id": "C:\\Users\\oasla\\Desktop\\AspNetCore\\WebApplication2\\WebApplication2\\wwwroot\\Assets\\images\\website-images\\2-1-370x270.webp",
       "PackagePath": "staticwebassets\\Assets\\images\\website-images\\2-1-370x270.webp"
     },

@@ -1,4 +1,5 @@
-﻿@model Service
+﻿@using WebApplication2.Areas.Admin.ViewModels
+@model ServiceModel
 @{
     ViewData["Title"] = "Create";
 }
@@ -13,11 +14,11 @@
 					<p class="card-description">
 						Basic form layout
 					</p>
-					<form class="forms-sample" method="post">
+					<form class="forms-sample" method="post" enctype="multipart/form-data">
 						<div class="form-group">
 							<label for="exampleInputUsername1">Image</label>
-							<input  class="form-control" asp-for="Image" placeholder="Image">
-
+							<input  class="form-control" asp-for="Image" placeholder="Image" accept="image/*">
+							<span asp-validation-for="Image" class="text-danger"></span>
 						</div>
 						<div class="form-group">
 							<label for="exampleInputEmail1">Title</label>

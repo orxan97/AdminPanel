@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "AAu+j1HZo6yRXSvSlLko2lCDSu2f7Kj8RZVR4Df6akY=",
+  "Hash": "0b05XjYVorDtSt0/Rbop+sncRT0iRzYbXjXmOb0oj8U=",
   "Source": "WebApplication2",
   "BasePath": "_content/WebApplication2",
   "Mode": "Default",
@@ -3398,23 +3398,6 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\Assets\\images\\testimonial\\user\\3.png"
-    },
-    {
-      "Identity": "C:\\Users\\oasla\\Desktop\\AspNetCore\\WebApplication2\\WebApplication2\\wwwroot\\Assets\\images\\website-images\\1.png",
-      "SourceId": "WebApplication2",
-      "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\oasla\\Desktop\\AspNetCore\\WebApplication2\\WebApplication2\\wwwroot\\",
-      "BasePath": "_content/WebApplication2",
-      "RelativePath": "Assets/images/website-images/1.png",
-      "AssetKind": "All",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "RelatedAsset": "",
-      "AssetTraitName": "",
-      "AssetTraitValue": "",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\Assets\\images\\website-images\\1.png"
     },
     {
       "Identity": "C:\\Users\\oasla\\Desktop\\AspNetCore\\WebApplication2\\WebApplication2\\wwwroot\\Assets\\images\\website-images\\1-1.jpg",

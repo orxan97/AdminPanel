@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using WebApplication2.Areas.Admin.ViewModels;
 
 namespace WebApplication2.Areas.Admin.Controllers
 {
@@ -7,11 +9,15 @@ namespace WebApplication2.Areas.Admin.Controllers
 	public class ServiceController : Controller
 	{
 
-		private readonly AppDbContext _context;
-
-		public ServiceController(AppDbContext context)
+		private readonly AppDbContext _appDbContext;
+		private readonly IWebHostEnvironment _webHostEnvironment;
+		private int _count = 0;
+		public ServiceController(AppDbContext appDbContext, IWebHostEnvironment webHostEnvironment)
 		{
-			_context = context;
+			_appDbContext = appDbContext;
+			_webHostEnvironment = webHostEnvironment;
+			IEnumerable<Service> services = _appDbContext.Services.AsEnumerable();
+			_count = services.Count();
 		}
 
 
@@ -19,37 +25,85 @@ namespace WebApplication2.Areas.Admin.Controllers
 
 		public IActionResult Index()
 		{
-			List<Service> services = _context.Services.ToList();
-			ViewBag.Count = services.Count;
+			IEnumerable<Service> services = _appDbContext.Services.AsEnumerable();
+
+			ViewBag.Count = _count;
 			return View(services);
 		}
 
 		public IActionResult Create()
 		{
+	
+			if (_count== 3)
+				return BadRequest();
 			return View();
 		}
 
 		[HttpPost]
-		public IActionResult Create(Service service)
+		public async Task<IActionResult> Create(ServiceModel serviceModel)
 
 		{
-			if (!ModelState.IsValid)
+
+			if (_count == 3)
+				return BadRequest();
+
+			if (!ModelState.IsValid) return View();
+			
+
+
+			if (serviceModel.Image == null)
+			{
+				ModelState.AddModelError("Image", "image bosh ola  bilmez");
 				return View();
+			}
+			if (serviceModel.Image.Length / 1024 > 100)
+			{
+				ModelState.AddModelError("Image","fayylin hecmi 100kb dan kicik olmalidir");
+				return View();
+			}
+			if (!serviceModel.Image.ContentType.Contains("image/"))
+			{
+				ModelState.AddModelError("Image","faylin tipi image olmalidir");
+				return View();
+			}
 
+			//string path = _webHostEnvironment.WebRootPath + @"\Assets\images\website-images" + serviceModel.Image.FileName;
+			//return Content(path);
+			string fileName = $"{Guid.NewGuid()} - {serviceModel.Image.FileName}"; 
+			string path = Path.Combine(_webHostEnvironment.WebRootPath, "Assets", "images", "website-images",
+			fileName);
+			
 
+			using (FileStream stream = new FileStream(path, FileMode.Create))
+			{
+			 await serviceModel.Image.CopyToAsync(stream);
+			}
+			Service service = new ()
+			{
+				Name = serviceModel.Name,
+				Description = serviceModel.Description,
+				Image =fileName
+			};
 
-		
-			_context.Services.Add(service);
-			_context.SaveChanges();
+		     await	_appDbContext.Services.AddAsync(service);
+			await _appDbContext.SaveChangesAsync();
 
 			return RedirectToAction(nameof(Index));
+
+				//return Content(serviceModel.Image.FileName);
+			//return Content(serviceModel.Image.Length.ToString());
+			//return Content(serviceModel.Image.ContentType);
+			
+
+
+
 		}
 		public IActionResult Detail(int id)
 		{
-			if (_context.Services.Count() == 1)
+			if (_appDbContext.Services.Count() == 1)
 				return BadRequest();
 
-			Service? service = _context.Services.AsNoTracking().FirstOrDefault(s => s.Id == id);
+			Service? service = _appDbContext.Services.AsNoTracking().FirstOrDefault(s => s.Id == id);
 			if (service is null)
 				return NotFound();
 
@@ -57,7 +111,7 @@ namespace WebApplication2.Areas.Admin.Controllers
 		}
 		public IActionResult Delete(int id)
 		{
-			Service? service = _context.Services.FirstOrDefault(s => s.Id == id);
+			Service? service = _appDbContext.Services.FirstOrDefault(s => s.Id == id);
 			if (service is null)
 				return NotFound();
 
@@ -68,12 +122,12 @@ namespace WebApplication2.Areas.Admin.Controllers
 		[ActionName("Delete")]
 		public IActionResult DeleteService(int id)
 		{
-			Service? service = _context.Services.FirstOrDefault(s => s.Id == id);
+			Service? service = _appDbContext.Services.FirstOrDefault(s => s.Id == id);
 			if (service is null)
 				return NotFound();
 
-			_context.Services.Remove(service);
-			_context.SaveChanges();
+			_appDbContext.Services.Remove(service);
+			_appDbContext.SaveChanges();
 
 
 
@@ -82,7 +136,7 @@ namespace WebApplication2.Areas.Admin.Controllers
 
 		public IActionResult Update(int id)
 		{
-			Service? service = _context.Services.AsNoTracking().FirstOrDefault(s => s.Id == id);
+			Service? service = _appDbContext.Services.AsNoTracking().FirstOrDefault(s => s.Id == id);
 			if (service is null)
 				return NotFound();
 
@@ -94,7 +148,7 @@ namespace WebApplication2.Areas.Admin.Controllers
 		public IActionResult Update(Service service, int id)
 		{
 
-			Service? dbService = _context.Services.FirstOrDefault(s => s.Id == id);
+			Service? dbService = _appDbContext.Services.FirstOrDefault(s => s.Id == id);
 			if (service is null)
 				return NotFound();
 
@@ -103,7 +157,7 @@ namespace WebApplication2.Areas.Admin.Controllers
 			dbService.Image = service.Image;
 
 
-			_context.SaveChanges();
+			_appDbContext.SaveChanges();
 
 			return RedirectToAction(nameof(Index));
 
