@@ -13,8 +13,8 @@
 				<div class="table-responsive">
 					@if (ViewBag.Count < 3)
 					{
-						
-					<a class="btn btn-primary" asp-action="Create">Create</a>
+
+						<a class="btn btn-primary" asp-action="Create">Create</a>
 					}
 					<table class="table">
 						<thead>
@@ -39,16 +39,9 @@
 									<td>
 										<a class="btn btn-success" asp-action="Detail" asp-route-id="@serviceItem.Id">Detail</a>
 										<a class="btn btn-warning" asp-action="Update" asp-route-id=@serviceItem.Id>Update</a>
-										@if (ViewBag.Count == 1)
-										{
 
-											<a class="btn btn-danger disabled" asp-action="Delete" asp-route-id=@serviceItem.Id>Delete</a>
-										}
-										else
-										{
-											<a class="btn btn-danger " asp-action="Delete" asp-route-id=@serviceItem.Id>Delete</a>
 
-										}
+										<a class="btn btn-danger @(ViewBag.Count == 1 ? "disabled" : "")" asp-action="Delete" asp-route-id=@serviceItem.Id>Delete</a>
 
 									</td>
 

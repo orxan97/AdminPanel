@@ -2,6 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using WebApplication2.Areas.Admin.ViewModels;
+using WebApplication2.Utils;
+using WebApplication2.Utils.Enum;
+using WebApplication2.Utilsı;
 
 namespace WebApplication2.Areas.Admin.Controllers
 {
@@ -40,9 +43,11 @@ namespace WebApplication2.Areas.Admin.Controllers
 		}
 
 		[HttpPost]
+		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Create(ServiceModel serviceModel)
 
 		{
+			//return Content(serviceModel.Image.ContentType);
 
 			if (_count == 3)
 				return BadRequest();
@@ -56,14 +61,22 @@ namespace WebApplication2.Areas.Admin.Controllers
 				ModelState.AddModelError("Image", "image bosh ola  bilmez");
 				return View();
 			}
-			if (serviceModel.Image.Length / 1024 > 100)
+			if (!serviceModel.Image.CheckFileSize(100))
 			{
 				ModelState.AddModelError("Image","fayylin hecmi 100kb dan kicik olmalidir");
 				return View();
 			}
-			if (!serviceModel.Image.ContentType.Contains("image/"))
+			if (!serviceModel.Image.CheckFileType(ContentType.image.ToString()))
 			{
 				ModelState.AddModelError("Image","faylin tipi image olmalidir");
+				return View();
+			}
+
+		    bool isExists = await _appDbContext.Services.AnyAsync(s => s.Name == serviceModel.Name);
+
+			if (isExists)
+			{
+				ModelState.AddModelError("Name", "Hal hazirda bu adda bir servis movcuddur");
 				return View();
 			}
 
@@ -109,58 +122,121 @@ namespace WebApplication2.Areas.Admin.Controllers
 
 			return View(service);
 		}
-		public IActionResult Delete(int id)
+
+
+
+		
+		public async Task<IActionResult> Delete(int id)
 		{
-			Service? service = _appDbContext.Services.FirstOrDefault(s => s.Id == id);
+			Service? service = await _appDbContext.Services.FirstOrDefaultAsync(s => s.Id == id);
 			if (service is null)
 				return NotFound();
+
 
 			return View(service);
-
 		}
 		[HttpPost]
-		[ActionName("Delete")]
-		public IActionResult DeleteService(int id)
+		[ActionName(nameof(Delete))]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> DeleteService(int id)
 		{
-			Service? service = _appDbContext.Services.FirstOrDefault(s => s.Id == id);
+			Service? service = await _appDbContext.Services.FirstOrDefaultAsync(s => s.Id == id);
 			if (service is null)
 				return NotFound();
+
+			//string path = Path.Combine(_webHostEnvironment.WebRootPath, "assets", "images", "website-images",
+			//	service.Image);
+			//if (System.IO.File.Exists(path))
+			//{
+			//	System.IO.File.Delete(path);
+			//}
+
+			FileService.DeleteFiled(_webHostEnvironment.WebRootPath, "assets", "images", "website-images",
+			service.Image);
+
 
 			_appDbContext.Services.Remove(service);
-			_appDbContext.SaveChanges();
-
-
+			await _appDbContext.SaveChangesAsync();		
 
 			return RedirectToAction(nameof(Index));
 		}
 
-		public IActionResult Update(int id)
+		public async Task<IActionResult> Update(int id)
 		{
-			Service? service = _appDbContext.Services.AsNoTracking().FirstOrDefault(s => s.Id == id);
+			Service? service = _appDbContext.Services.FirstOrDefault(s => s.Id == id);
 			if (service is null)
 				return NotFound();
+			ServiceModel serviceModel = new()
+			{
+				Id = service.Id,
+				Name = service.Name,
+				Description = service.Description
+			};
 
 
-			return View(service);
+			return View(serviceModel);
 		}
 		[HttpPost]
-
-		public IActionResult Update(Service service, int id)
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Update(int id, ServiceModel serviceModel)
 		{
 
-			Service? dbService = _appDbContext.Services.FirstOrDefault(s => s.Id == id);
+			if (!ModelState.IsValid)
+				return View();
+
+
+			Service? service = await _appDbContext.Services.FirstOrDefaultAsync(s => s.Id == id);
 			if (service is null)
 				return NotFound();
 
-			dbService.Name = service.Name;
-			dbService.Description = service.Description;
-			dbService.Image = service.Image;
+			if (serviceModel.Image !=null)
+			{
+
+				if (!serviceModel.Image.CheckFileSize(100))
+				{
+					ModelState.AddModelError("Image", "fayylin hecmi 100kb dan kicik olmalidir");
+					return View();
+				}
+				if (!serviceModel.Image.CheckFileType(ContentType.image.ToString()))
+				{
+					ModelState.AddModelError("Image", "faylin tipi image olmalidir");
+					return View();
+				}
+				var path = Path.Combine(_webHostEnvironment.WebRootPath, "assets", "images", "website-images",service.Image);
+				FileService.DeleteFiled(path);
+				string fileName = $"{Guid.NewGuid()}-{serviceModel.Image.FileName}";
+				var newPath = Path.Combine(_webHostEnvironment.WebRootPath, "assets", "images", "website-images", fileName);
+				using (FileStream stream = new FileStream(newPath, FileMode.Create))
+				{
+					await serviceModel.Image.CopyToAsync(stream);
+				}
+				service.Image = fileName;
+			}
+
+			service.Name = serviceModel.Name;
+			service.Description = serviceModel.Description;
+		
+			//Service newservice = new()
+			//{
+			//	Id = serviceModel.Id,
+			//	Name = serviceModel.Name,
+			//	Description = serviceModel.Description
+			//};
+			////Service.Name = service.Name;
+			////Service.Description = service.Description;
+			////Service.Image = service.Image;
 
 
-			_appDbContext.SaveChanges();
+
+
+			//_appDbContext.Services.Update(newservice);
+			await _appDbContext.SaveChangesAsync();
 
 			return RedirectToAction(nameof(Index));
 
 		}
+
+		
+
 	}
 }
